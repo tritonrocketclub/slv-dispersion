@@ -1,0 +1,27 @@
+% TRITON ROCKET CLUB
+% ROCKET PROPERTIES DOCUMENT- 6 inch P-Motor
+% (c) 2015 TRITON ROCKET CLUB
+%
+% Last Updated: 11/01/2015
+%
+% For use with RocketAltitudeEstimation.m
+% Use same format for testing alternate parameters
+
+
+% Rocket Body Properties
+wetmass	= 63.91		% [kg] mass of structure+payload+propellant
+drymass = 41.91		% [kg] mass of structure+payload only
+radius	= 0.0762		% [m]radius of body
+static  = 1				% static margin (CG-CP/diameter)
+
+% Rocket Motor Properties
+thrust 	= 5068			% [N] thrust
+Isp		= 210			% [s] specific impulse
+Itot	= 46520			% [N-s] total impulse
+%burn	= 9.18				% [s] Override the burn time, ignoring Isp and thrust. Delete line for no override
+
+% Simulation Properties
+res		= 100			% Simulation resolution. Increase for accuracy, decrease for speed
+rho		= 1.2			% [kg/m^3] Air density for simple simulation
+drag	= 0.5			% Drag coefficient for simple simulation
+gravity	= 9.81			% [m/s^2] Gravitation acceleration at sea level, for simple sim
