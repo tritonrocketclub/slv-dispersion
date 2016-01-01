@@ -31,7 +31,7 @@ if nargin == 3
     numsims = varargin{2};
     numfrag = varargin{3};
 else
-    res = input('Specify resolution (default 100): ');
+    res = input('Specify resolution (default 5): ');
     numsims = input('Specify number of iterations: ');
     numfrag = input('Specify number of fragments: ');
 end
@@ -127,10 +127,12 @@ flightnoise = (maxflight-minflight)/numfrag;
 % Do the trajectory calculations for j iterations
 % with i fragments and k total trajectories.
 %
-k = 0;
+trajectories = {};
+k = numsims*numfrag;
 for j = 1:numsims
     flightpts = linspace(minflight, maxflight, numfrag);
-    for i = 1:numfrag
+    jtrajectories = {};
+    parfor i = 1:numfrag
         % Add random noise to each flight point
         % This way the BUSVs vary for each iteration
         flightpts(i) = flightpts(i) + flightnoise*(2*rand()-1);
@@ -140,7 +142,6 @@ for j = 1:numsims
         elseif l < minflight
             l = minflight;
         end
-        k = k+1;
         busv = flightdata(l, :);
         states = BreakupTrajectory( busv, 40, simp, fragfileID, i+(j-1)*numfrag );
         statex = abs(states(end, 1));
@@ -156,9 +157,10 @@ for j = 1:numsims
                 end
             end
         end
-        trajectories{k}=states;
+        jtrajectories{i}=states;
         hold on;
     end
+    trajectories = [trajectories,jtrajectories];
     fprintf('\nCompleted %d iterations at %2.2f seconds...', j, cputime-tasktime);
 end
 %

@@ -22,118 +22,111 @@ function [ newsv ] = BreakupStep( sv, fmass, Cd, A, simp, buf )
 % functions called:
 %   none
 %
-res = simp.res;
-gravity = simp.gravity;
-rho = simp.rho;
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate K1
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Calculate current gravity and air density
 %
-ig = interp1(gravity(:,1), gravity(:,2), sv(3)); %[m/s^2] Precise acceleration due to gravity
-irho = interp1(rho(:,1), rho(:,2), sv(3));
+% Calculate acceleration
 %
-% Calculate the drag force
-%
-vel = [sv(4), sv(5), sv(6)];
-fmD = Cd*irho*A/2*(vel(1)^2+vel(2)^2+vel(3)^2);
-%
-% Get unit vector in direction of velocity
-%
-nvel = norm(vel);
-if nvel == 0
-    vDir = [0, 0, 0];
-else
-    vDir = vel/norm(vel);
-end
-%
-% Calculate drag force in opposite direction to motion
-%
-fD = fmD*-vDir;
-%
-% Calculate the gravitational force
-%
-fmG = ig*fmass;
-fG = [0,0,-fmG];
-%
-% Calculate the explosive breakup force using inverse square
-%
-busv = buf.busv;
-fmBu = buf.force;
-dirBu = buf.direction;
-distsqr = 1+(sv(1)-busv(1))^2 + (sv(2)-busv(2))^2 + (sv(3)-busv(3))^2;
-fBu = dirBu*fmBu./distsqr;
-%
-% Apply 2nd Order Runge Kutta Method to solve ODE
-%
-% Acceleration
-ax = fD(1)/fmass + fBu(1)/fmass;
-ay = fD(2)/fmass + fBu(2)/fmass;
-az = fD(3)/fmass + fBu(3)/fmass - ig;
+aK1 = BreakupAccel(sv, fmass, Cd, A, simp, buf);
 %
 % Calculate an intelligent time step based on the magnitude
 % of the acceleration
 % Bound the step between 1/1000 and 1/2
+% Create h/2 variable
 %
-h = 100/(res*sum(ax^2 + ay^2 + az^2));
+res = simp.res;
+h = 100/(res*sum(aK1(1)^2 + aK1(2)^2 + aK1(3)^2));
 if h < 10^-3
     h = 10^-3;
 elseif h > .5
     h = .5;
 end
-%
-% Calculate h/2
-%
 h2 = h/2;
-% Velocity
-vx = vel(1) + h/2*ax;
-vy = vel(2) + h/2*ay;
-vz = vel(3) + h/2*az;
-% Position
-px = sv(1) + h/2*vx;
-py = sv(2) + h/2*vy;
-pz = sv(3) + h/2*vz;
 %
-% Calculate drag force again using new velocity
-% Make sure to recalculate direction of force
-% [solution to an obscure bug]
+% Calculate velocity K1 term
 %
-fmD = Cd*irho*A/2*(vx^2+vy^2+vz^2);
-vel = [vx, vy, vz];
-nvel = norm(vel);
-if nvel == 0
-    vDir = [0, 0, 0];
-else
-    vDir = vel/norm(vel);
-end
-fD = fmD*-vDir;
+vK1 = h.*aK1;
 %
-% Calculate breakup force again using new position
+% Calculate position K1 term
 %
-distsqr = 1 + (px-busv(1))^2 + (py-busv(2))^2 + (pz-busv(3))^2;
-fBu = dirBu*fmBu./distsqr;
-% decay = exp(-(sv(7)+h/2)/busv(7))*(1-(sv(7)+h/2)/busv(7));
-% fBu = fBu*decay;
+vel1 = [sv(4), sv(5), sv(6)];
+pos1 = [sv(1), sv(2), sv(3)];
+pK1 = h.*vel1;
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate K2
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Recalculate ODE
+% Create new state vector for K2
 %
-% Acceleration
-ax = fD(1)/fmass + fBu(1)/fmass;
-ay = fD(2)/fmass + fBu(2)/fmass;
-az = fD(3)/fmass + fBu(3)/fmass - ig;
-% Velocity
-vx = vel(1) + h*ax;
-vy = vel(2) + h*ay;
-vz = vel(3) + h*az;
-% Position
-px = sv(1) + h*vx;
-py = sv(2) + h*vy;
-pz = sv(3) + h*vz;
-% Time
+svK2 = sv + [vK1./2, pK1./2, h2];
+%
+% Calculate acceleration with K2 state vector
+%
+aK2 = BreakupAccel(svK2, fmass, Cd, A, simp, buf);
+%
+% Calculate velocity K2 term
+%
+vK2 = h.*aK2;
+%
+% Calculate position K2 term
+%
+vel2 = [svK2(4), svK2(5), svK2(6)];
+pK2 = h.*vel2;
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate K3
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Create new state vector for K3
+%
+svK3 = sv + [vK2./2, pK2./2, h2];
+%
+% Calculate acceleration with K3 state vector
+%
+aK3 = BreakupAccel(svK3, fmass, Cd, A, simp, buf);
+%
+% Calculate velocity K3 term
+%
+vK3 = h.*aK3;
+vel3 = [svK3(4), svK3(5), svK3(6)];
+%
+% Calculate position K3 term
+%
+pK3 = h.*vel3;
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate K4
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Create new state vector for K4
+%
+svK4 = sv + [vK3, pK3, h];
+%
+% Calculate acceleration with K4 state vector
+%
+aK4 = BreakupAccel(svK4, fmass, Cd, A, simp, buf);
+%
+% Calculate velocity K4 term
+%
+vK4 = h.*aK4;
+vel4 = [svK4(4), svK4(5), svK4(6)];
+%
+% Calculate position K4 term
+%
+pK4 = h.*vel4;
+%
+% Calculate the sum RK45 terms
+%
+vstep = vel1 + (1/6).*(vK1 + 2.*(vK2 + vK3) + vK4);
+pstep = pos1 + (1/6).*(pK1 + 2.*(pK2 + pK3) + pK4);
+%
+% Format output state vector
+%
 t = sv(7) + h;
-%
-% Format the output state vector
-%
-newsv = [px, py, pz, vx, vy, vz, t];
-%
-% End of function BreakupStep.m
-%
+newsv = [pstep, vstep, t];
 end

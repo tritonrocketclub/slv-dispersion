@@ -2,3 +2,5 @@
 trajectory/SimResults.txt
 
 breakup/FragmentData.txt
+
+*.m~
