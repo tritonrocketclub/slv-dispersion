@@ -1,6 +1,7 @@
 
 trajectory/SimResults.txt
-
 breakup/FragmentData.txt
 
 *.m~
+trajectory/MaxPressure.m
+*.asv
