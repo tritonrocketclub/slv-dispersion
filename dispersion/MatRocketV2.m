@@ -3,7 +3,8 @@
 % ROCKET ALTITUDE SIMULATION PROGRAM (MatRocket) v2.0
 % (c)2016 TRITON ROCKET CLUB
 %
-% Authors: Trevor Irwin, Robert Bacon, Patrick Lee, et al
+% Authors: Trevor Irwin, Minh Nguyen, Toriana Dabkowski,
+%   Robert Bacon, Patrick Lee, et al
 %
 % This script simulates 3DOF flight paths for a solid fuel rocket
 % with a Monte Carlo approximation of dispersion probability.
@@ -184,11 +185,45 @@ traj = cell(1, simuProp.count);
 fprintf('\nCalculating Characteristic Trajectory\n');
 traj{1} = RocketTrajectory( zerosv, false );
 %
+% Draw trajectories actively
+%
+fig3 = figure(3);
+itraj = traj{1};
+time = itraj(:,7);
+vel = itraj(:,6);
+alt = itraj(:,3);
+posy = itraj(:,2);
+posx = itraj(:,1);
+plot3(posx,posy,alt);
+hold on;
+xlabel( 'Easterly (m)' );
+ylabel( 'Northerly (m)' );
+zlabel( 'Altitude (m)' );
+title( 'All Rocket Simulations' );
+drawnow;
+fig4 = figure(4);
+plot(time,alt);
+hold on;
+drawnow;
+%
 % Calculate all other trajectories
 %
 for i = 2:simuProp.count
     fprintf('\nCalculating Trajectory #%d\n', i);
     traj{i} = RocketTrajectory( zerosv, true );
+    itraj = traj{i};
+    time = itraj(:,7);
+    vel = itraj(:,6);
+    alt = itraj(:,3);
+    posy = itraj(:,2);
+    posx = itraj(:,1);
+    figure(3);
+    plot3(posx,posy,alt);
+    drawnow;
+    figure(4);
+    plot(time,alt);
+    hold on;
+    drawnow;
 end
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -44,6 +44,7 @@ FPA = [x,y,z];
 if ~useFPA
     FPA = [0,0,1];
 end
+fprintf('Using FPA of %.4g %.4g %.4g\n', FPA);
 %
 % Simulate the boost phase
 %
