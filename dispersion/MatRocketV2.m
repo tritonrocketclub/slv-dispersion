@@ -3,7 +3,7 @@
 % ROCKET ALTITUDE SIMULATION PROGRAM (MatRocket) v2.0
 % (c)2016 TRITON ROCKET CLUB
 %
-% Authors: Trevor Irwin, Yen Nguyen, Aidan Setran
+% Authors: Trevor Irwin, Robert Bacon, Patrick Lee, et al
 %
 % This script simulates 3DOF flight paths for a solid fuel rocket
 % with a Monte Carlo approximation of dispersion probability.
