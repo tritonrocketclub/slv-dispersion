@@ -14,40 +14,47 @@ function [ gamma ] = GetSTDFPA( )
 %   none
 %
 
+%
+% Initialize global structures
+%
+global rocketProp;
+global simuProp;
+
 %Define Basic Variables
 
 %Fin Variables
-N = 4; %number of fins
-c_R = .457; %fin root chord [m]
-c_T = .0508; %fin tip chord [m]
-fin_height = .152; %fin height [m]
+N = rocketProp.numfins; %number of fins
+c_R = rocketProp.rootchord; %fin root chord [m]
+c_T = rocketProp.tipchord; %fin tip chord [m]
+fin_height = rocketProp.finheight; %fin height [m]
 S = N*((c_R+c_T)/2)*fin_height; %Aerodynamic reference area, or the total fin areas [m^2]
 
 
-C_G = 2.27; %Center of mass [m] (From OpenRocket)
-C_P = 2.41; %Center of pressure [m] (From OpenRocket)
-T=7980; %thrust [N] (average thrust from OpenRocket O motor)
-d = .1524; %rocket diameter [m]
+C_G = rocketProp.C_G; %Center of mass [m] (From OpenRocket)
+C_P = rocketProp.C_P; %Center of pressure [m] (From OpenRocket)
+T=rocketProp.thrust; %thrust [N] (average thrust from OpenRocket O motor)
+d = rocketProp.radius*2; %rocket diameter [m]
 A_xc = (d/2)^2*pi; %cross sectional area [m^2]
-L_R = 3.2; %Rocket Length [m]
+L_R = rocketProp.rocketlength; %Rocket Length [m]
 l_throat = L_R - C_G; %distance from nozzle throat to center of mass [m]
-L = 4.8768; %Launcher Length [m]
-m_0 = 56.2455; %wet rocket mass [kg]
-m_b = 13.6; %dry rocket mass [kg]
+L = rocketProp.launcherlength; %Launcher Length [m]
+m_0 = rocketProp.wetMass; %wet rocket mass [kg]
+m_b = rocketProp.dryMass; %dry rocket mass [kg]
 Area_moment_inertia = (pi/4)*(d/2)^2; %Appromxation of the second moment of area of the rocket [m]
 K_r = sqrt(Area_moment_inertia/A_xc);
-delta_t = .0010908308; %thrust misalignment angle [radians] (from http://www.rsandt.com/media/Standardized%20Perturbation%20Values.pdf)
+delta_t = rocketProp.thrustma; %thrust misalignment angle [radians] (from http://www.rsandt.com/media/Standardized%20Perturbation%20Values.pdf)
 omega = .125*K_r; %Lateral offset of the center of mass [m] (from http://www.rsandt.com/media/Standardized%20Perturbation%20Values.pdf)
 I_p = 1/12*m_b*L_R^2 + m_b*(.5*L_R - C_G)^2; %Pitch moment of inertia [kg*m^2] (assuming the rocket is a solid rod, using parallel axis theorem)
 I_xx = .5*m_b*(d/2); %Roll moment of inertia (assuming the rocket is a solid cylinder)
-U_burnout = 950; %Burnout velocity [m/s]
-h_burnout = 13500; %Burnout altitude [m]
-c_burnout = sqrt(1.4*287*216.7); %speed of sound at burnout
+U_burnout = rocketProp.burnoutVelocity; %Burnout velocity [m/s]
+h_burnout = rocketProp.burnoutAltitude; %Burnout altitude [m]
+ambient_temp = simuProp.burnoutAmbientTemp; %Burnout ambient temperature [K]
+c_burnout = sqrt(1.4*287*ambient_temp); %speed of sound at burnout
 M_burnout = U_burnout/c_burnout; %Mach number at burnout
-rho_burnout = .247205; %density of air at burnout altitude [kg/m^3] linearly interpolated from standard atmospheric conditions at 13500m
+rho_burnout = simuProp.burnoutAmbientDensity; %density of air at burnout altitude [kg/m^3] linearly interpolated from standard atmospheric conditions at 13500m
 r_e = 6371000; %mean radius of the earth
 g = 9.8*(r_e/(r_e + h_burnout)); %acceleration due to gravity [m/s^2]
-a = 5*g; %acceleration (using assumption that g/2a = .1 from the document) [m/s^2]
+a = 5*g; %acceleration (using assumption that g/2a = .1 from www.rsandt.com/media/Flt%20Path%20Angl%20Dispersions.doc) [m/s^2]
 
 %Define Variables to calculate pitch wave number (assume relationship
 %between coefficient of normal force is linear with angle of attack)
@@ -62,8 +69,8 @@ lambda_p = sqrt(-rho_burnout*A_xc*d*C_M_alpha/(2*I_p)); %pitch wave number www.r
 
 %http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19730012271.pdf
 %delta_f = 0.00872665; %mean cant angle [rad]; rocket being built to 0 cant but assuming worst case scenario of .5 degrees
-delta_f = .5*.00349066;
-b = .152 + d/2; %fin semispan [m] (from rocket center line to tip of the fin)
+delta_f = rocketProp.meanCantAngle; %mean cant angle [rad]; rocket being built to 0 cant but assuming worst case scenario of .5 degrees
+b = rocketProp.finheight + d/2; %fin semispan [m] (from rocket center line to tip of the fin)
 A = (c_R*b - c_T*(d/2))/(b-d/2); %parameter A [m] www.rsandt.com/media/Fin%20Setting%20Theory[3].doc
 C = (c_R - c_T)/(b-d/2); %slope of the chord
 q = .5*rho_burnout*U_burnout^2; %dynamic pressure [Pa]
@@ -77,7 +84,7 @@ lambda_R = -((C_L_delta*N*delta_f)/((d/2)*C_L_p))*(2*pi*rho_burnout*(h_burnout -
 
 alpha_ss = T*(l_throat*delta_t + omega)/(I_p*U_burnout^2*(lambda_p^2 - lambda_R^2)); 
 
-C_L_alpha = 1.35; %Lift coefficient slope http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19930087519.pdf
+C_L_alpha = rocketProp.liftCoefficientSlope; %Lift coefficient slope http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19930087519.pdf
 
 L_A = q*S*C_L_alpha*alpha_ss;
 
@@ -85,8 +92,8 @@ gamma_T = (L_A/(m_b*g))*((h_burnout/L)^(g/(a) - 1)); %Standard deviation in disp
 phi = lambda_R*(h_burnout - L);
 
 %Weather Variables
-sigma_G = 2.2352; %Standard deviation in gust velocity (need wind data at launch date) [m/s]
-l_G = 300; %Longitudinal turbulence scale length (using assumed value from http://arc.aiaa.org/doi/pdf/10.2514/1.A32037) [m]
+sigma_G = simuProp.sigma_G; %Standard deviation in gust velocity (need wind data at launch date) [m/s]
+l_G = simuProp.l_G; %Longitudinal turbulence scale length (using assumed value from http://arc.aiaa.org/doi/pdf/10.2514/1.A32037) [m]
 
 Northerly = gamma_T*sin(phi); %Northerly component of flight path angle
 Easterly = gamma_T*cos(phi); %Easterly component of flight path angle

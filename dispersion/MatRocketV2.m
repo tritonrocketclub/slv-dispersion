@@ -95,12 +95,33 @@ for i=1:m
             rocketProp.wetMass = RProp{2}(i); %[kg] mass of structure+propellant
         case 'radius'
             rocketProp.radius = RProp{2}(i); %[in]radius of body
+        case 'numfins'
+            rocketProp.numfins = RProp{2}(i); %number of fins on the rocket
+        case 'rootchord'
+            rocketProp.rootchord = RProp{2}(i); %[m] fin root chord
+        case 'tipchord'
+            rocketProp.tipchord = RProp{2}(i); %[m] fin tip chord
+        case 'finheight'
+            rocketProp.finheight = RProp{2}(i); %[m] fin height
+        case 'C_G'
+            rocketProp.C_G = RProp{2}(i); %[m]Center of mass (From OpenRocket)
+        case 'C_P'
+            rocketProp.C_P = RProp{2}(i); %[m] Center of pressure (From OpenRocket)
+        case 'rocketlength'
+            rocketProp.rocketlength = RProp{2}(i); %[m] Rocket length
+        case 'launcherlength'
+            rocketProp.launcherlength = RProp{2}(i); %[m] Launcher length
         case 'rho'
             simuProp.rho = RProp{2}(i); %[kg/m^3] air density
+        case 'meanCantAngle'
+            rocketProp.meanCantAngle = RProp{2}(i); %mean cant angle [rad]; rocket being built to 0 cant but assuming worst case scenario of .5 degrees
+        case 'liftCoefficientSlope'
+            rocketProp.liftCoefficientSlope = RProp{2}(i);
         case 'drag'
             simuProp.drag = RProp{2}(i); %drag coefficient
         case 'gravity'
             simuProp.gravity = RProp{2}(i); %[m/s^2] gravitational acceleration
+        
         
         % --Motor Properties--
         case 'thrust'
@@ -111,6 +132,8 @@ for i=1:m
             rocketProp.iTotal = RProp{2}(i); %[N-s] total impulse
         case 'burn'
             rocketProp.burnTime = RProp{2}(i); %[s]An option to override the burn time
+        case 'thrustma'
+            rocketProp.thrustma = RProp{2}(i); %[rad] Thrust misalignmenet angle
         
         % --Chute Properties--
         case 'chutedrag'
@@ -129,6 +152,10 @@ for i=1:m
             simuProp.recoveryRes = RProp{2}(i); % Resolution for recovery section
         case 'count'
             simuProp.count = RProp{2}(i); % Number of simulations to run
+        case 'sigma_G'
+            simuProp.sigma_G = RProp{2}(i); % [m/s]Standard deviation in gust velocity (need wind data at launch date)
+        case 'l_G'
+            simuProp.l_G = RProp{2}(i); % [m] Longitudinal turbulence scale length (using assumed value from http://arc.aiaa.org/doi/pdf/10.2514/1.A32037)
     end
 end
 %
@@ -181,8 +208,17 @@ traj = cell(1, simuProp.count);
 %
 % Calculate the characteristic trajectory with no FPA
 %
+%rocketProp.burnoutVelocity = 1000; %[m/s] hardcoded dummy variable
+%rocketProp.burnoutAltitude = 13500; %[m] hardcoded dummy variable
+%simuProp.burnoutAmbientTemp = 216.7; %[K] hardcoded dummy variable
+%simuProp.burnoutAmbientDensity = .247205; %[kg/m^3] hardcoded dummy variable
 fprintf('\nCalculating Characteristic Trajectory\n');
 traj{1} = RocketTrajectory( zerosv, false );
+rocketProp.burnoutVelocity = simuProp.burnOut(6); %[m/s] calculated from RocketTrajectory
+rocketProp.burnoutAltitude = simuProp.burnOut(3); %[m] calculated from RocketTrajectory
+simuProp.burnoutAmbientTemp = interp1(simuProp.tempr, simuProp.temp, rocketProp.burnoutAltitude); %[deg C] calculated using standard altitude values
+simuProp.burnoutAmbientTemp = simuProp.burnoutAmbientTemp + 273.15; %convert from deg C to K
+simuProp.burnoutAmbientDensity = interp1(simuProp.rhor, simuProp.rho, rocketProp.burnoutAltitude); %[kg/m^3] calculated based on altitude
 %
 % Calculate all other trajectories
 %

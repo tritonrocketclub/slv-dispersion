@@ -24,24 +24,25 @@ global simuProp;
 %
 % Calculate flight path angle vector vertical
 %
-gamma = GetSTDFPA();
-FPAv = normrnd(0, gamma);
-max(min(FPAv, pi/2),-pi/2);
-%
-% General FPA lateral
-%
-FPAl = 2*pi*rand();
-%
-% Convert to cartesian coords
-%
-x = cos(FPAl)*sin(FPAv);
-y = sin(FPAl)*sin(FPAv);
-z = cos(FPAv);
-FPA = [x,y,z];
+if useFPA
+    gamma = GetSTDFPA();
+    FPAv = normrnd(0, gamma);
+    max(min(FPAv, pi/2),-pi/2);
+    %
+    % General FPA lateral
+    %
+    FPAl = 2*pi*rand();
+    %
+    % Convert to cartesian coords
+    %
+    x = cos(FPAl)*sin(FPAv);
+    y = sin(FPAl)*sin(FPAv);
+    z = cos(FPAv);
+    FPA = [x,y,z];
 %
 % Reset to vertical if not using FPA
 %
-if ~useFPA
+else
     FPA = [0,0,1];
 end
 %
@@ -50,6 +51,7 @@ end
 fprintf('Calculating boost phase...');
 tstamp = cputime;
 boostm = IntegrateStepFunction( @RK45Wind, @BoostStepTerminate, sv, @BoostAccel, FPA );
+simuProp.burnOut = boostm(end,:); 
 fprintf('done! Took %0.3fs\n', cputime-tstamp);
 %
 % Simulate the coast phase
