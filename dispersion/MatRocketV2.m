@@ -138,7 +138,7 @@ for i=1:m
         
         % --Chute Properties--
         case 'chutedrag'
-            rocketProp.chuteDrag = RProp{2}(i); %drag coefficient
+            rocketProp.chuteCd = RProp{2}(i); %drag coefficient
         case 'chuteradius'
             rocketProp.chuteRadius = RProp{2}(i); %[m] chute radius
         case 'chutespillradius'
@@ -166,7 +166,9 @@ rocketProp.area = pi*rocketProp.radius^2;
 if rocketProp.burnTime == 0
     rocketProp.burnTime = rocketProp.iTotal/rocketProp.thrust;
 end
-rocketProp.chuteArea = pi*(rocketProp.chuteRadius-rocketProp.chuteSpillRadius)^2;
+arg = (rocketProp.chuteSpillRadius*pi)/(2*rocketProp.chuteRadius);
+rocketProp.chuteArea = pi*rocketProp.chuteRadius^2*cos(arg)^2;
+rocketProp.chuteDrag = rocketProp.chuteArea*rocketProp.chuteCd;
 if simuProp.count == 0  
     i = input('Input number of trajectories: ');
     simuProp.count = round(i);

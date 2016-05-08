@@ -55,7 +55,7 @@ end
 %
 % Calculate the drag force
 %
-fDm = 0.5*irho*vmag^2*rocketProp.chuteArea*rocketProp.chuteDrag;
+fDm = 0.5*irho*vmag^2*rocketProp.chuteDrag;
 fDv = -1*vdir*fDm;
 %
 % Get the current mass from time
