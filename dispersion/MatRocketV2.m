@@ -139,7 +139,8 @@ rocketProp.area = pi*rocketProp.radius^2;
 if rocketProp.burnTime == 0
     rocketProp.burnTime = rocketProp.iTotal/rocketProp.thrust;
 end
-if simuProp.count == 0
+rocketProp.chuteArea = pi*(rocketProp.chuteRadius-rocketProp.chuteSpillRadius)^2;
+if simuProp.count == 0  
     i = input('Input number of trajectories: ');
     simuProp.count = round(i);
 end

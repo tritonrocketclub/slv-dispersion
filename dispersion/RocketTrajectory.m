@@ -66,7 +66,7 @@ fprintf('done! Took %0.3fs\n', cputime-tstamp);
 fprintf('Calculating recovery phase...');
 tstamp = cputime;
 sv = coastm(end,:);
-recoverym = IntegrateStepFunction( @RK45Chute, @RecoveryStepTerminate, sv);
+recoverym = IntegrateStepFunction( @RK45Wind, @RecoveryStepTerminate, sv, @RecoveryAccel);
 fprintf('done! Took %0.3fs\n', cputime-tstamp);
 %
 % Format output matrix
