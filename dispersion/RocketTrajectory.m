@@ -44,6 +44,7 @@ FPA = [x,y,z];
 if ~useFPA
     FPA = [0,0,1];
 end
+fprintf('Using FPA of %.4g %.4g %.4g\n', FPA);
 %
 % Simulate the boost phase
 %
@@ -65,7 +66,7 @@ fprintf('done! Took %0.3fs\n', cputime-tstamp);
 fprintf('Calculating recovery phase...');
 tstamp = cputime;
 sv = coastm(end,:);
-recoverym = IntegrateStepFunction( @RK45Chute, @RecoveryStepTerminate, sv);
+recoverym = IntegrateStepFunction( @RK45Wind, @RecoveryStepTerminate, sv, @RecoveryAccel);
 fprintf('done! Took %0.3fs\n', cputime-tstamp);
 %
 % Format output matrix

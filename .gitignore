@@ -1,5 +1,6 @@
 
 trajectory/SimResults.txt
+dispersion/ignore/
 breakup/FragmentData.txt
 
 *.m~

@@ -23,7 +23,13 @@ function [ cont ] = CoastStepTerminate( sv, varargin )
 % Initialize global structures
 %
 global rocketProp
-cont = sv(3) > rocketProp.chuteAlt;
+%
+% Continue if the rocket is above the chute deployment altitude or
+% travelling upward.
+% In other words, terminate if the rocket is below chute deployment
+% altitude AND traveling downwards.
+%
+cont = (sv(3) > rocketProp.chuteAlt) || (sv(6) > 0);
 
 end
 
