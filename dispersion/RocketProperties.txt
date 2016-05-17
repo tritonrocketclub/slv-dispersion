@@ -9,8 +9,8 @@
 
 
 % Rocket Body Properties
-wetmass	= 41.69		% [kg] mass of structure+payload+propellant
-drymass = 32.523	% [kg] mass of structure+payload only
+wetmass	= 44.726		% [kg] mass of structure+payload+propellant
+drymass = 35.559		% [kg] mass of structure+payload only
 radius	= 0.0762		% [m]radius of body
 static  = 1				% static margin (CG-CP/diameter)
 
@@ -18,13 +18,13 @@ static  = 1				% static margin (CG-CP/diameter)
 thrust 	= 8124			% [N] thrust
 Isp		= 210			% [s] specific impulse
 Itot	= 36487			% [N-s] total impulse
-%burn	= 9.18				% [s] Override the burn time, ignoring Isp and thrust. Delete line for no override
+burn	= 4.49			% [s] Override the burn time, ignoring Isp and thrust. Delete line for no override
 
 % Chute Properties
 chutedrag           = 0.4
 chuteradius         = 1
 chutespillradius    = 0.1
-chutealt            = 2000
+chutealt            = 3000
 
 % Simulation Properties
 res		= 2			% Simulation resolution. Increase for accuracy, decrease for speed

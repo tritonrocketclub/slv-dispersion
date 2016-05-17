@@ -1,4 +1,4 @@
-%------------------------------------------------------
+0%------------------------------------------------------
 % TRITON ROCKET CLUB
 % ROCKET ALTITUDE SIMULATION PROGRAM (MatRocket) v2.0
 % (c)2016 TRITON ROCKET CLUB
@@ -187,7 +187,7 @@ traj{1} = RocketTrajectory( zerosv, false );
 %
 % Draw trajectories actively
 %
-fig3 = figure(3);
+fig1 = figure(1);
 itraj = traj{1};
 time = itraj(:,7);
 vel = itraj(:,6);
@@ -201,10 +201,6 @@ ylabel( 'Northerly (m)' );
 zlabel( 'Altitude (m)' );
 title( 'All Rocket Simulations' );
 drawnow;
-fig4 = figure(4);
-plot(time,alt);
-hold on;
-drawnow;
 %
 % Calculate all other trajectories
 %
@@ -217,12 +213,8 @@ for i = 2:simuProp.count
     alt = itraj(:,3);
     posy = itraj(:,2);
     posx = itraj(:,1);
-    figure(3);
+    figure(1);
     plot3(posx,posy,alt);
-    drawnow;
-    figure(4);
-    plot(time,alt);
-    hold on;
     drawnow;
 end
 %%
@@ -230,7 +222,7 @@ end
 % PLOTS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-fig1 = figure(1);
+fig3 = figure(3);
 grid on;
 grid minor;
 hold on;
@@ -247,18 +239,54 @@ ylabel(hAx(1), 'Velocity (m/s)');
 ylabel(hAx(2), 'Altitude (m)');
 set(hAx(1), 'Position',[0.14 0.18 0.72 0.72])
 
-fig2 = figure(2);
-for i = 1:size(traj,2)
-    itraj = traj{i};
-    time = itraj(:,7);
-    vel = itraj(:,6);
-    alt = itraj(:,3);
-    posy = itraj(:,2);
-    posx = itraj(:,1);
-    plot3(posx,posy,alt);
-    hold on;
+%
+% Calculate mean distance and standard deviation
+% Print these to console
+%
+figure(1);
+k = size(traj, 2);
+dist = zeros(1, k);
+allx = zeros(1, k);
+ally = zeros(1, k);
+for i = 1:k
+    allx(i) = traj{i}(end, 1);
+    ally(i) = traj{i}(end, 2);
 end
-xlabel( 'Easterly (m)' );
-ylabel( 'Northerly (m)' );
-zlabel( 'Altitude (m)' );
-title( 'All Rocket Simulations' );
+meanx = mean(allx);
+meany = mean(ally);
+stdx = std(allx);
+stdy = std(ally);
+for i = 1:k
+    dist(i) = sqrt((allx(i) - meanx)^2 + (ally(i) - meany)^2);
+end
+distmean = mean(dist);
+diststd = std(dist);
+fprintf('\nMean Easterly: %2.2fm\n', meanx);
+fprintf('Mean Northerly: %2.2fm\n', meany);
+fprintf('Mean Distance: %2.2fm\n', distmean);
+fprintf('StdDev on Distance: %2.2fm\n', diststd);
+fprintf('3Sigma Distance: %2.2fm\n', 3*diststd+distmean);
+%
+% Plot circles
+%
+t = linspace(0, 2*pi, 200);
+z = zeros(1, 200);
+plot3( meanx + diststd.*cos(t), meany + diststd.*sin(t), z, 'Color', 'c', 'LineStyle', '--');
+plot3( meanx + 2.*diststd.*cos(t), meany + 2.*diststd.*sin(t), z, 'Color', 'c', 'LineStyle', '--');
+plot3( meanx + 3.*diststd.*cos(t), meany + 3.*diststd.*sin(t), z, 'Color', 'c', 'LineStyle', '--');
+
+% fig2 = figure(2);
+% for i = 1:size(traj,2)
+%     itraj = traj{i};
+%     time = itraj(:,7);
+%     vel = itraj(:,6);
+%     alt = itraj(:,3);
+%     posy = itraj(:,2);
+%     posx = itraj(:,1);
+%     plot3(posx,posy,alt);
+%     hold on;
+% end
+% xlabel( 'Easterly (m)' );
+% ylabel( 'Northerly (m)' );
+% zlabel( 'Altitude (m)' );
+% title( 'All Rocket Simulations' );
